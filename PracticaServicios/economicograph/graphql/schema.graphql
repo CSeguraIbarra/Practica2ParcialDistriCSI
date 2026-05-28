@@ -1,0 +1,44 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    cuenta(
+        id: ID! @eq @rules(apply: ["required"])
+    ): Cuenta @find
+
+    cuentas: [Cuenta!]! @all
+}
+
+type Mutation {
+    crearCuenta(
+        cuenta: String!
+        ci: String
+        nombres: String
+        apellidos: String
+        saldo: Float
+    ): Cuenta @create
+
+    actualizarCuenta(
+        id: ID! @rules(apply: ["required"])
+        cuenta: String
+        ci: String
+        nombres: String
+        apellidos: String
+        saldo: Float
+    ): Cuenta @update
+
+    eliminarCuenta(
+        id: ID! @whereKey
+    ): Cuenta @delete
+}
+
+type Cuenta {
+    id: ID!
+    cuenta: String!
+    ci: String
+    nombres: String
+    apellidos: String
+    saldo: Float
+    created_at: DateTime!
+    updated_at: DateTime!
+}
