@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Comercio1 - Básico</title>
+  <style>body{font-family:Arial,Helvetica,sans-serif;margin:18px}</style>
+</head>
+<body>
+  <h3>Comercio1 (versión mínima)</h3>
+
+  <div>
+    <strong>Login</strong><br>
+    <input id="email" value="test@example.com"> <input id="password" type="password" value="secret"> 
+    <button id="btnLogin">Login</button>
+    <span id="loginMsg"></span>
+  </div>
+
+  <div style="margin-top:10px">
+    <strong>Transacción</strong><br>
+    <input id="cuentaOrigen" value="1001"> 
+    <input id="monto" value="10.00"> 
+    <input id="cuentaDestino" value="2002"> 
+    <button id="btnTransaccion">Enviar</button>
+  </div>
+
+  <pre id="out">Listo.</pre>
+
+  <script>
+  const API = 'http://127.0.0.1:8000';
+  const out = id => document.getElementById(id);
+
+  async function login(){
+    try{
+      const r = await fetch(API + '/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email: out('email').value, password: out('password').value})});
+      const js = await r.json();
+      if(r.ok && js.token){ localStorage.setItem('token', js.token); out('loginMsg').textContent='OK'; out('out').textContent = js.token; }
+      else { out('loginMsg').textContent='Error'; out('out').textContent = JSON.stringify(js); }
+    }catch(e){ out('loginMsg').textContent='Error de red'; out('out').textContent = e.toString(); }
+  }
+
+  async function transaccion(){
+    try{
+      const token = localStorage.getItem('token');
+      if(!token){ alert('Login primero'); return; }
+      const payload = { cuentaOrigen: out('cuentaOrigen').value, monto: parseFloat(out('monto').value), cuentaDestino: out('cuentaDestino').value };
+      const r = await fetch(API + '/api/transaccion', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}, body: JSON.stringify(payload)});
+      const js = await r.json();
+      out('out').textContent = 'HTTP ' + r.status + '\n' + JSON.stringify(js);
+    }catch(e){ out('out').textContent = 'Error de red: ' + e.toString(); }
+  }
+
+  document.getElementById('btnLogin').onclick = login;
+  document.getElementById('btnTransaccion').onclick = transaccion;
+  </script>
+</body>
+</html>
